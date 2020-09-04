@@ -9,6 +9,7 @@ const count = 10;
 const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&count=${count}`;
 
 let resultsArray = [];
+let favorites = {};
 
 async function getNASAPictuers() {
     try {
@@ -48,6 +49,7 @@ function updateDOM() {
         const addToFavoritesBTN = document.createElement('p');
         addToFavoritesBTN.classList.add('clickable');
         addToFavoritesBTN.textContent = 'Add to Favorites';
+        addToFavoritesBTN.setAttribute('onclick', `saveFavorites('${result.url}')`) ;
         // card text
         const cardText = document.createElement('p');
         cardText.classList.add('card-text');
@@ -69,6 +71,15 @@ function updateDOM() {
         card.append(imageLink, cardBody);
         imagesContainer.appendChild(card);
 
+    });
+}
+
+function saveFavorites(itemUrl) {
+    resultsArray.forEach(item => {
+        if(item.url.includes(itemUrl)){
+            favorites[itemUrl] = item;
+            console.log(favorites);
+        }
     });
 }
 
