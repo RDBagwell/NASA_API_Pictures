@@ -55,10 +55,13 @@ function updateDOM() {
         // text muted
         const textMuted = document.createElement('small');
         textMuted.classList.add('text-muted');
+        //date
         const dateElem = document.createElement('strong');
         dateElem.textContent = result.date;
+        //copyright
+        const copyrightResult = result.copyright === undefined ? '' : result.copyright;
         const copyrightInfo = document.createElement('span');
-        copyrightInfo.textContent = ` ${result.copyright}`;
+        copyrightInfo.textContent = ` ${copyrightResult}`;
         //append
         textMuted.append(dateElem, copyrightInfo);
         cardBody.append(cardTitle, addToFavoritesBTN, cardText, textMuted);
