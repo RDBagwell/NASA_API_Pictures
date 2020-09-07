@@ -11,19 +11,36 @@ const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&count=${co
 let resultsArray = [];
 let favorites = {};
 
+function showContent(page) {
+    window.scrollTo({
+        top: 0,
+        behavior: 'instant'
+    });
+    if(page === 'results'){
+        resultsNav.classList.remove('hidden');
+        favoritesNav.classList.add('hidden');
+    } else {
+        resultsNav.classList.add('hidden');
+        favoritesNav.classList.remove('hidden'); 
+    }
+    loader.classList.add('hidden');
+}
+
 async function getNASAPictuers() {
+    // loader.classList.remove('hidden');
     try {
        const response = await fetch(apiUrl);
        resultsArray = await response.json();
-       console.log(resultsArray);
-       updateDOM()
+       updateDOM('results');
     } catch (error) {
         
     }
 }
 
-function updateDOM() {
-    resultsArray.forEach(result => {
+function createDOMNodes(page) {
+    const currentArray = page === 'results' ? resultsArray : Object.values(favorites) ;
+    console.log(page);
+    currentArray.forEach(result => {
         // card element
         const card = document.createElement('div');
         card.classList.add('card');
@@ -48,8 +65,13 @@ function updateDOM() {
         // Add to Favorites BTN
         const addToFavoritesBTN = document.createElement('p');
         addToFavoritesBTN.classList.add('clickable');
-        addToFavoritesBTN.textContent = 'Add to Favorites';
-        addToFavoritesBTN.setAttribute('onclick', `saveFavorites('${result.url}')`) ;
+        if(page === 'results'){
+            addToFavoritesBTN.textContent = 'Add to Favorites';
+            addToFavoritesBTN.setAttribute('onclick', `saveFavorites('${result.url}')`) ;
+        } else {
+            addToFavoritesBTN.textContent = 'Remove From Favorites';
+            addToFavoritesBTN.setAttribute('onclick', `removeFavorites('${result.url}')`) ;
+        }
         // card text
         const cardText = document.createElement('p');
         cardText.classList.add('card-text');
@@ -74,13 +96,36 @@ function updateDOM() {
     });
 }
 
+function updateDOM(page) {
+    if(localStorage.getItem('NASAFavorites')){
+        favorites = JSON.parse(localStorage.getItem('NASAFavorites'));
+    }
+    imagesContainer.textContent = ''
+    createDOMNodes(page);
+    showContent(page);
+}
+
 function saveFavorites(itemUrl) {
     resultsArray.forEach(item => {
-        if(item.url.includes(itemUrl)){
+        if(item.url.includes(itemUrl) && !favorites[itemUrl]){
             favorites[itemUrl] = item;
-            console.log(favorites);
+
+            saveConfirmed.hidden = false;
+            setTimeout(() => {
+                saveConfirmed.hidden = true;
+            }, 2000);
+
+            localStorage.setItem('NASAFavorites', JSON.stringify(favorites));
         }
     });
+}
+
+function removeFavorites(itemUrl) {
+    if(favorites[itemUrl]){
+        delete favorites[itemUrl];
+        localStorage.setItem('NASAFavorites', JSON.stringify(favorites));
+        updateDOM('favorites');
+    }
 }
 
 getNASAPictuers()
